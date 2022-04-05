@@ -3,6 +3,9 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const { create } = require("express-handlebars");
+const csrf = require("csurf");
+
+// const User = require(".models/User");
 require("dotenv").config()
 require("./database/db")
 
@@ -39,6 +42,15 @@ app.set("views", "./views");
 
 app.use(express.static(__dirname + "/public"));
 app.use(express.urlencoded({ extended: true }));
+
+app.use(csrf());
+
+app.use((req, res, next) => {
+    res.locals.csrfToken = req.csrfToken();
+    res.locals.mensajes = req.flash("mensajes");
+    next()
+});
+
 app.use("/", require("./router/home"))
 app.use("/auth", require("./router/auth"))
 

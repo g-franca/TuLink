@@ -1,9 +1,10 @@
 const User = require("../models/User");
 const { validationResult } = require("express-validator");
-
+const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 const registerForm = (req, res) => {
-    res.render("register", { mensajes: req.flash("mensajes") });
+    res.render("register");
 }
 
 
@@ -24,7 +25,24 @@ const registerUser = async (req, res) => {
         
         user = new User({ userName, email, password, tokenConfirm: tokenID});
         await user.save()
+
         //enviar corre electronico con la confirmacion de la cuenta
+        const transport = nodemailer.createTransport({
+            host: "smtp.mailtrap.io",
+            port: 2525,
+            auth: {
+                user: process.env.userEmail,
+                pass: process.env.passEmail
+            }
+        });
+
+        await transport.sendMail({
+            from: '"Guilherme Franca " <foo@example.com>',
+            to: user.email,
+            subject: "verifique cuenta de correo",
+            html: `<a href="http://localhost:5000/auth/confirmar/${user.tokenConfirm}">verificar cuenta aquí</a>`,
+        });
+        
         req.flash("mensajes", [{msg: "Revisa tu correo electronico para confirmar tu cuenta."}]);
         res.redirect("/auth/login");
 
@@ -61,7 +79,7 @@ const confirmarCuenta = async (req, res) => {
 
 const loginForm = (req, res) => {
     // ruta de prueba de login
-    res.render("login", { mensajes: req.flash("mensajes") });
+    res.render("login");
 };
 
 

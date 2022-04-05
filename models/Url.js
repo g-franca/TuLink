@@ -12,7 +12,12 @@ const urlSchema = new Schema({
         unique: true,
         required: true,
     },
-})
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    }
+});
 
 const Url = mongoose.model("Url", urlSchema);
 module.exports = Url;
